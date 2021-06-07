@@ -1,14 +1,14 @@
 /*
- * RGB_color_sensor.c
+ * RGB_Sensor_updated.c
  *
- * Created: 5/15/2021 9:20:14 PM
+ * Created: 6/7/2021 11:22:31 PM
  * Author : Movindi
  */ 
 
 #include <avr/io.h>
 #define F_CPU 8000000UL
 #include <util/delay.h>
-#include <stdio.h> 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -45,41 +45,41 @@ void sensorOutput(float whiteArr[3], float blackArr[3], float rgbArr[3]); //Func
 
 int inputCount = 0; //global variable to count inputs in input Mode
 
- int main(void)
- {
-	 DDRB = 0X0F; //bit 0-3 are outputs & bit 4-7 are inputs
-	 DDRD = 0XFF; //PORTD is output
-	 DDRC = 0XFE; //PORTC is bit 0 is input others are output
-	 
-	 ADMUX = (1 << REFS0); // setting the reference of ADC  (connected to ADC0 --> 0000)
-	 ADCSRA = (1 << ADEN) | (1 << ADIE) | (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2); //ADC enable  ADC interrupt enable ADC pre-scaler selection to 128
-	 DIDR0 = (ADC0D); //Digital input disable
-	 
-	 ADCSRA |= (1 << ADSC); // ADC start conversion
-	 
-	 int inputMode = 0;
-	 int sensingMode = 0;
-	 
-	 int inputArr[9] = {0,0,0,0,0,0,0,0,0}; //Array to store input values
-	 float whiteArr[3] = {0,0,0}; //Array to store highest values(calibrating)
-	 float blackArr[3] = {0,0,0}; //Array to store lowest values(calibrating)
-	 float rgbArr_1[3] = {0,0,0}; //Array to store RGB values for sensing mode
-	 int rgbArr_2[3] = {0,0,0}; //RGB values for input giving mode
-	 
-	 i2cInit();
-	 i2cStart();
-	 i2cWrite(0X70);
-	 lcdInit();
-	 
-	 lcdString("****WELCOME*****");//welcome message
-	 
-	 while (1)
-	 {
+int main(void)
+{
+	DDRB = 0XCF; //PORTB4 and PORTB5 are inputs
+	DDRD = 0XE8; //PORTD0, PORTD1, PORTD2 and PORTD4 are inputs
+	DDRC = 0XFE; //PORTC0 is input others are output
+	
+	ADMUX = (1 << REFS0); // setting the reference of ADC  (connected to ADC0 --> 0000)
+	ADCSRA = (1 << ADEN) | (1 << ADIE) | (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2); //ADC enable  ADC interrupt enable ADC pre-scaler selection to 128
+	DIDR0 = (ADC0D); //Digital input disable
+	
+	ADCSRA |= (1 << ADSC); // ADC start conversion
+	
+	int inputMode = 0;
+	int sensingMode = 0;
+	
+	int inputArr[9] = {0,0,0,0,0,0,0,0,0}; //Array to store input values
+	float whiteArr[3] = {0,0,0}; //Array to store highest values(calibrating)
+	float blackArr[3] = {0,0,0}; //Array to store lowest values(calibrating)
+	float rgbArr_1[3] = {0,0,0}; //Array to store RGB values for sensing mode
+	int rgbArr_2[3] = {0,0,0}; //RGB values for input giving mode
+	
+	i2cInit();
+	i2cStart();
+	i2cWrite(0X70);
+	lcdInit();
+	
+	lcdString("****WELCOME*****");//welcome message
+	
+	while (1)
+	{
 		char* key = getKey(); //get key from key pad
 		if (strcmp(key,"NO_KEY")!=0) //checking key has been given or not
 		{
 			if (strcmp(key,"A")==0) //Calibrating Mode
-			{	
+			{
 				int inputMode = 0;
 				int sensingMode = 0;
 				lcdCmd(0x01);//clear LCD
@@ -90,7 +90,7 @@ int inputCount = 0; //global variable to count inputs in input Mode
 				calibrate(whiteArr,blackArr);//calibrating
 			}
 			else if (strcmp(key,"B")==0) //Sensing Mode
-			{	
+			{
 				inputMode = 0;
 				sensingMode = 1;
 				lcdCmd(0x01);
@@ -102,7 +102,7 @@ int inputCount = 0; //global variable to count inputs in input Mode
 				sensorOutput(whiteArr,blackArr,rgbArr_1);//output
 			}
 			else if (strcmp(key,"C")==0) //Input Mode (select the input Mode)
-			{	
+			{
 				inputMode = 1;
 				sensingMode = 0;
 				inputCount = 0;
@@ -122,7 +122,7 @@ int inputCount = 0; //global variable to count inputs in input Mode
 				OCR0B = 0;
 				OCR0A = 0;
 				if (sensingMode == 1)//reset sensor values
-				{	 
+				{
 					sensor(rgbArr_1);//sensing
 					sensorOutput(whiteArr,blackArr,rgbArr_1);//output
 				}
@@ -155,19 +155,19 @@ int inputCount = 0; //global variable to count inputs in input Mode
 					else
 					{
 						lcdCmd(0x01);
-						lcdString("Value Error"); //if value>255
+						lcdString("Value Error!"); //if value>255
 					}
 				}
 			}
 		}
-	 }
- }
- 
+	}
+}
+
 //get inputs from keypad
-char* getKey() 
+char* getKey()
 {
-	char* key = "NO_KEY"; 
-	PORTB = 0X01; //1st row 
+	char* key = "NO_KEY";
+	PORTB = 0X01; //1st row
 	if (PINB == 0X11)
 	{
 		key = "1";
@@ -176,11 +176,11 @@ char* getKey()
 	{
 		key = "2";
 	}
-	if (PINB == 0X41)
+	if ((PINB == 0X01) && ((PIND & 0X04) == 0X04))
 	{
 		key = "3";
 	}
-	if (PINB == 0X81)
+	if ((PINB == 0X01) && ((PIND & 0X10) == 0X10))
 	{
 		key = "A";
 	}
@@ -195,11 +195,11 @@ char* getKey()
 	{
 		key = "5";
 	}
-	if (PINB == 0X42)
+	if ((PINB == 0X02) && ((PIND & 0X04) == 0X04))
 	{
 		key = "6";
 	}
-	if (PINB == 0X82)
+	if ((PINB == 0X02) && ((PIND & 0X10) == 0X10))
 	{
 		key = "B";
 	}
@@ -214,11 +214,11 @@ char* getKey()
 	{
 		key = "8";
 	}
-	if (PINB == 0X44)
+	if ((PINB == 0X04) && ((PIND & 0X04) == 0X04))
 	{
 		key = "9";
 	}
-	if (PINB == 0X84)
+	if ((PINB == 0X04) && ((PIND & 0X10) == 0X10))
 	{
 		key = "C";
 	}
@@ -233,11 +233,11 @@ char* getKey()
 	{
 		key = "0";
 	}
-	if (PINB == 0X48)
+	if ((PINB == 0X08) && ((PIND & 0X04) == 0X04))
 	{
 		key = "#";
 	}
-	if (PINB == 0X88)
+	if ((PINB == 0X08) && ((PIND & 0X10) == 0X10))
 	{
 		key = "D";
 	}
@@ -275,7 +275,7 @@ void toggle()
 {
 	TWDR |= 0x02;					//---PIN En de la LCD en = 1;  -----Latching data in to LCD data register using High to Low signal
 	TWCR = (1<<TWINT) | (1<<TWEN);	//---Enable I2C and clear interrupt
-	while  (!(TWCR &(1<<TWINT)));	
+	while  (!(TWCR &(1<<TWINT)));
 	_delay_ms(1);
 	TWDR &= ~0x02;					//---PIN del Enable de la LCD en = 0;
 	TWCR = (1<<TWINT) | (1<<TWEN);	//---Enable I2C and clear interrupt
@@ -406,21 +406,21 @@ float ldrValue()
 //light up r, g, b led and take values(used in both calibration and sensor mode)
 void getReading(float rgbArr[3])
 {
-	PORTD |= 0X01; //light red led
+	PORTC |= 0X02; //light red led
 	_delay_ms(300);
 	//get readings
 	rgbArr[0] = ldrValue();
-	PORTD &= 0XFE; //off red led
-	PORTD |= 0X02; //light green led
+	PORTC &= 0XFD; //off red led
+	PORTC |= 0X04; //light green led
 	_delay_ms(300);
 	//get readings
 	rgbArr[1] = ldrValue();
-	PORTD &= 0XFD; //off green led
-	PORTD |= 0X04;
+	PORTC &= 0XFB; //off green led
+	PORTC |= 0X08;
 	_delay_ms(300); //light blue led
 	//get readings
 	rgbArr[2] = ldrValue();
-	PORTD &= 0XFB; //off blue led
+	PORTC &= 0XF7; //off blue led
 }
 
 //Sensing Mode
@@ -487,7 +487,7 @@ void calibrate(float whiteArr[3],float blackArr[3])
 	getReading(Arr_3);//lighting up LEDs and sensing
 	lcdCmd(0x01);
 	lcdString("Calibration done");
-	//light intensity and resistant of LDR are inversely proportional. to get darkest values maximum resistant should be taken 
+	//light intensity and resistant of LDR are inversely proportional. to get darkest values maximum resistant should be taken
 	blackArr[0] = getMax(Arr_1[0],Arr_2[0],Arr_3[0]);
 	blackArr[1] = getMax(Arr_1[1],Arr_2[1],Arr_3[1]);
 	blackArr[2] = getMax(Arr_1[2],Arr_2[2],Arr_3[2]);
@@ -518,12 +518,12 @@ void rgbLED(char x, int num)
 	TCCR2B = (1 << CS20) | (1 << CS21); //pre scaler 64 ( for OC2B)
 	
 	if (x == 'r')
-	{ 
+	{
 		TCCR2A = (1 << WGM21) | (1 << WGM20) | (1 << COM2B1); // fast PWM non inverting
 		OCR2B = num;
 	}
 	else if (x == 'g')
-	{			
+	{
 		TCCR0A |= (1 << WGM01) | (1 << WGM00) | (1 << COM0B1); // fast PWM non inverting
 		OCR0B = num;
 	}
@@ -544,9 +544,9 @@ int checkError(int Arr[3])
 		{
 			Error = 1;
 			break;
-		} 
+		}
 	}
-	return Error;	
+	return Error;
 }
 
 //Function of output (sensor Mode)
@@ -558,7 +558,7 @@ void sensorOutput(float whiteArr[3], float blackArr[3], float rgbArr[3] )
 	//Red
 	value = mapValue(rgbArr[0],blackArr[0],whiteArr[0]);
 	lcdString("R:");
-	sprintf(str, "%d", value); 
+	sprintf(str, "%d", value);
 	lcdString(str);
 	rgbLED('r',value);
 	//Green
