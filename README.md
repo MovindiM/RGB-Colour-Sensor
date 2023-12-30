@@ -1,12 +1,26 @@
-# RGB-Colour-Sensor
-Semester 2 lab project - GRP 14 at Department of Electronic and Telecommunication Engineering - University of Moratywa
+# RGB Colour Sensor
 
-Colour sensors, mainly identified as true-colour or translucent index. These true colour sensors are based on one of the colour models, most commonly the RGB model, with a wide variety of applications in industrial, medical and security systems. In this project, we were expected to design and implement a colour sensor that can detect the colour on a surface and outputs its R, G, and B values.
+## Semester 2 Lab Project - GRP 14
+Department of Electronic and Telecommunication Engineering  
+University of Moratuwa
 
-We were allowed to have a calibration stage at the beginning. Our solution is able to handle alterations in lighting conditions. We have the following modes in our design.
+Welcome to the RGB Colour Sensor project repository! This project focuses on designing and implementing a colour sensor capable of detecting the colour on a surface and providing its R, G, and B values. The sensor is based on the RGB model and can find applications in industrial, medical, and security systems.
 
-(a) A mode to perform calibration
+## Project Overview
 
-(b) A mode to perform sensing
+In this project, we aimed to develop a versatile colour sensor with the following features:
 
-(c) A mode to light a RBG LED for user given R, G, and B values.
+- **Calibration Stage:** The sensor includes a calibration stage to accommodate alterations in lighting conditions.
+
+- **Modes:**
+  - **Calibration Mode (a):** Allows the user to perform calibration at the beginning.
+  - **Sensing Mode (b):** Enables the sensor to detect and output the R, G, and B values of the colour on a surface.
+  - **LED Illumination Mode (c):** Lights up an RGB LED based on user-defined R, G, and B values.
+
+## Getting Started
+
+To get started with the RGB Colour Sensor, follow these steps:
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/your-username/RGB-Colour-Sensor.git
